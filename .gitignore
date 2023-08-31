@@ -1,0 +1,47 @@
+# Linux
+*~
+.Trash-*
+
+# Windows
+*.lnk
+$RECYCLE.BIN/
+
+# Windows default autosave extension
+*.asv
+
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# OSX / *nix default autosave extension
+*.m~
+
+# Compiled MEX binaries (all platforms)
+*.mex*
+
+# Packaged app and toolbox files 
+*.mlappinstall 
+*.mltbx 
+  
+# Generated helpsearch folders 
+helpsearch*/ 
+
+# Simulink code generation folders
+slprj/
+_slprj/
+sccprj/
+_sccprj/
+
+# Matlab code generation folders
+codegen/
+
+# Simulink autosave extension
+*.autosave
+
+# Octave session info
+octave-workspace
+
+# temporary files
+.nfs*
+.fuse_hidden*
