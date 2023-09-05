@@ -41,13 +41,13 @@ fig_simple = plot_model_urdf(model,opt);
 drawnow;
 
 
-% Save figure
-png_name = sprintf('fig/fig_node_%s.png',model_name);
-save_fig2png(fig_node,png_name,VERBOSE);
-png_name = sprintf('fig/fig_model_%s.png',model_name);
-save_fig2png(fig_model,png_name,VERBOSE);
-png_name = sprintf('fig/fig_simple_%s.png',model_name);
-save_fig2png(fig_simple,png_name,VERBOSE);
+% % Save figure
+% png_name = sprintf('fig/fig_node_%s.png',model_name);
+% save_fig2png(fig_node,png_name,VERBOSE);
+% png_name = sprintf('fig/fig_model_%s.png',model_name);
+% save_fig2png(fig_model,png_name,VERBOSE);
+% png_name = sprintf('fig/fig_simple_%s.png',model_name);
+% save_fig2png(fig_simple,png_name,VERBOSE);
 
 %% Plot random positions
 max_tick = 10;
