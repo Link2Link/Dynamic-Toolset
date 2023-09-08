@@ -47,3 +47,4 @@ octave-workspace
 .fuse_hidden*
 
 temp.m
+output/
