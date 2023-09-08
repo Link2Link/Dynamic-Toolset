@@ -45,3 +45,6 @@ octave-workspace
 # temporary files
 .nfs*
 .fuse_hidden*
+
+temp.m
+output/
