@@ -85,7 +85,7 @@ function dyn = Dynamics(rbt_df, geom, gravity_vec)
 %     dyn.tau = simplify(dyn.tau);
     
     disp('calc_dyn_: time ' + string(toc) + 'sec');
-    dyn.H = Dynamics_calc_regressor(rbt_df, dyn);
+    dyn.H = collect(expand(simplify(Dynamics_calc_regressor(rbt_df, dyn))));
     dyn.inertial_param = rbt_df.bary_params';
 end
 
