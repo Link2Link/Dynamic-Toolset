@@ -3,8 +3,8 @@ function dyn = Dynamics_MDH(rbt_df, geom, gravity_vec)
     format long;
     Rn_n1 = geom.Rn_n1;
     Pn_n1 = geom.Pn_n1;
-    dq = rbt_df.dq_var;
-    ddq = rbt_df.ddq_var;
+    dq = rbt_df.d_coordinates;
+    ddq = rbt_df.dd_coordinates;
     w = cell(1,rbt_df.frame_num); % Angular velocity
     dw = cell(1,rbt_df.frame_num); % Angular acceleration
     dv = cell(1,rbt_df.frame_num); % Linear acceleration
@@ -135,10 +135,14 @@ function dyn = Dynamics_MDH(rbt_df, geom, gravity_vec)
     dyn.f_l = f_l; % Motor output torque
     dyn.tau_l = tau_l; % Motor output force
     dyn.motor_t_l = motor_t_l; % Final motor force/torque
-
-    dyn.H_l = equationsToMatrix(motor_t_l,rbt_df.link_params);
-
+    disp('Dynamics: time ' + string(toc) + 'sec');
     %% Inertial parameter linearization ->tau=H*P
+    % Method 1
+    tic;
+    dyn.H_l = equationsToMatrix(motor_t_l,rbt_df.link_params);
+    disp('Linearization Method 1: time ' + string(toc) + 'sec');
+    % Method 2
+    tic;
     % Auxiliary matrices B A 
     dof = rbt_df.dof;
     B = cell(1,dof);
@@ -164,7 +168,9 @@ function dyn = Dynamics_MDH(rbt_df, geom, gravity_vec)
 
     dyn.H = H;
 
-    disp('Dynamics: time ' + string(toc) + 'sec');
+    disp('Linearization Method 2: time ' + string(toc) + 'sec');
+    
+    
 end
 
 % Linearization function

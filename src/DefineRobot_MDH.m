@@ -35,9 +35,9 @@ function rbt_df = DefineRobot_genParams_MDH(rbt_df)
     rbt_df.L_mat = num2cell(zeros(1, rbt_df.dof));          % inertial tenser matrix in link frame
     rbt_df.link_params = [];                             % inertial parameter in link frame
     rbt_df.std_params = [];                              % standard inertial parameters
-    rbt_df.q_var = sym(zeros(1, rbt_df.dof));               
-    rbt_df.dq_var = sym(zeros(1, rbt_df.dof));
-    rbt_df.ddq_var = sym(zeros(1, rbt_df.dof));
+    rbt_df.coordinates = sym(zeros(1, rbt_df.dof));               
+    rbt_df.d_coordinates = sym(zeros(1, rbt_df.dof));
+    rbt_df.dd_coordinates = sym(zeros(1, rbt_df.dof));
     
     for num = 1:rbt_df.dof
         rbt_df.m{num} = sym('m'+string(num), 'real');
@@ -58,9 +58,9 @@ function rbt_df = DefineRobot_genParams_MDH(rbt_df)
     
     for i = 1:rbt_df.dof
         if rbt_df.joint_type{i+1} ~= 3
-            rbt_df.q_var(i) = rbt_df.theta{i+1};    
-            rbt_df.dq_var(i) = sym("d"+string(rbt_df.theta{i+1}), 'real');
-            rbt_df.ddq_var(i) = sym("dd"+string(rbt_df.theta{i+1}), 'real');
+            rbt_df.coordinates(i) = rbt_df.theta{i+1};    
+            rbt_df.d_coordinates(i) = sym("d"+string(rbt_df.theta{i+1}), 'real');
+            rbt_df.dd_coordinates(i) = sym("dd"+string(rbt_df.theta{i+1}), 'real');
         end
         
     end
