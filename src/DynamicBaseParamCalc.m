@@ -40,7 +40,7 @@ function [r, P_X, P, Kd] = find_dyn_param_deps(rbt_df, dyn)
     Z = zeros(dof * sample_num, param_num);
     
     funcHandle = matlabFunction(vpa(dyn.H),'Vars', {rbt_df.coordinates', rbt_df.d_coordinates', rbt_df.dd_coordinates'});
-    
+    rng(123);   % 固定随机数种子，确保每次生成结果相同
     for i = 1:sample_num
         q = rand([dof, 1])*2*pi - pi;
         dq = rand([dof, 1])*2*pi - pi;
