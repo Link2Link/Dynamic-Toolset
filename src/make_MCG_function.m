@@ -7,7 +7,7 @@ tic
 disp('Creating M C G matrix ...');
 model_name = rbt.rbt_df.name;
 P = sym('p', [rbt.base.base_num,1], 'real');
-reresult.base_param_symbol = P;
+result.base_param_symbol = P;
 
 DOF = size(rbt.base.H_b, 1);
 Y = rbt.base.H_b;
@@ -18,9 +18,9 @@ g = subs(tau, [rbt.rbt_df.d_coordinates, rbt.rbt_df.dd_coordinates], [zeros(size
 mc = tau - g;
 m = subs(mc, [rbt.rbt_df.d_coordinates], [zeros(size(rbt.rbt_df.d_coordinates))]);
 c = mc - m;
-reresult.g = g;
-reresult.m = m;
-reresult.c = c;
+result.g = g;
+result.m = m;
+result.c = c;
 
 
 %% make static part
@@ -32,12 +32,12 @@ for v = vars
     end
 end
 [base2static_part, ~] = equationsToMatrix(static_part_vars, P);
-reresult.static_param_symbol = static_part_vars;
-reresult.base_param2static_param = base2static_part;
+result.static_param_symbol = static_part_vars;
+result.base_param2static_param = base2static_part;
 [Gmat, ~] = equationsToMatrix(g, static_part_vars);
-reresult.Gmat = simplify(Gmat);
+result.Gmat = simplify(Gmat);
 
-matlabFunction(reresult.Gmat, 'File',out_path+model_name+'_G_mat', 'Vars', {rbt.rbt_df.coordinates'});
+matlabFunction(result.Gmat, 'File',out_path+model_name+'_G_mat', 'Vars', {rbt.rbt_df.coordinates'});
 disp('function writen into '+ out_path + model_name + '_G_mat.m')
 
 matlabFunction(base2static_part, 'File',out_path+model_name+'_base_param2static_param');
@@ -57,6 +57,7 @@ for k = 1:DOF
     M_col = subs(m, [rbt.rbt_df.dd_coordinates], [one_hot']);
     M = [M, M_col];
 end
+result.M = M;
 matlabFunction(vpa(M), 'File',out_path+model_name+'_M_func', 'Vars', {rbt.rbt_df.coordinates', P});
 disp('function writen into '+ out_path + model_name + '_M_func.m')
 
@@ -74,6 +75,7 @@ for i = 1:DOF
         end
     end
 end
+result.C = C;
 rbt.C_b_func = matlabFunction(vpa(C), 'File',out_path+model_name+'_C_func', 'Vars', {rbt.rbt_df.coordinates', rbt.rbt_df.d_coordinates', P});
 disp('function writen into '+ out_path + model_name + '_C_func.m')
 
