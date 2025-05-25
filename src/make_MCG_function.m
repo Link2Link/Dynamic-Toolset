@@ -14,10 +14,15 @@ Y = rbt.base.H_b;
 tau = Y*P;
 
 %% seperate m g c
+% 将速度、加速度给0，得到静态的部分(重力+弹簧)
 g = subs(tau, [rbt.rbt_df.d_coordinates, rbt.rbt_df.dd_coordinates], [zeros(size(rbt.rbt_df.d_coordinates)), zeros(size(rbt.rbt_df.dd_coordinates))]);
+% 从力矩中减去静态部分剩余部分是m和c
 mc = tau - g;
+% 将速度给0，得到m部分
 m = subs(mc, [rbt.rbt_df.d_coordinates], [zeros(size(rbt.rbt_df.d_coordinates))]);
+% 从mc中减去m得到c部分
 c = mc - m;
+
 result.g = g;
 result.m = m;
 result.c = c;
@@ -31,9 +36,11 @@ for v = vars
         static_part_vars = [static_part_vars; v];
     end
 end
+% 得到从最小惯性参数到静态参数的映射
 [base2static_part, ~] = equationsToMatrix(static_part_vars, P);
 result.static_param_symbol = static_part_vars;
 result.base_param2static_param = base2static_part;
+% 生成静态部分的矩阵表示，用于辨识静态部分
 [Gmat, ~] = equationsToMatrix(g, static_part_vars);
 result.Gmat = simplify(Gmat);
 
@@ -44,12 +51,14 @@ matlabFunction(base2static_part, 'File',out_path+model_name+'_base_param2static_
 disp('base param to static param mapping matrix writen into '+ out_path + model_name + '_base_param2static_param.m')
 
 %% make G matrix
+% 静态部分的运行时使用，输如角度和参数P，输出力矩
 G = vpa(simplify(g));
 matlabFunction(G, 'File',out_path+model_name+'_G_func', 'Vars', {rbt.rbt_df.coordinates', P});
 disp('function writen into '+ out_path + model_name + '_G_func.m')
 
 
 %% make M matrix
+% 将加速度逐个给1，得到M矩阵的每一列，拼接为M矩阵
 M = [];
 for k = 1:DOF
     one_hot = zeros(DOF, 1);
@@ -63,6 +72,7 @@ disp('function writen into '+ out_path + model_name + '_M_func.m')
 
 
 %% make C matrix
+% 使用克氏符计算C矩阵
 q = rbt.rbt_df.coordinates;
 dq = rbt.rbt_df.d_coordinates;
 Christoffel = @(i,j,k) 0.5*(diff(M(i,j), q(k)) + diff(M(i,k), q(j)) - diff(M(j,k), q(i)));
@@ -79,7 +89,7 @@ result.C = C;
 rbt.C_b_func = matlabFunction(vpa(C), 'File',out_path+model_name+'_C_func', 'Vars', {rbt.rbt_df.coordinates', rbt.rbt_df.d_coordinates', P});
 disp('function writen into '+ out_path + model_name + '_C_func.m')
 
-%% check
+%% 检查动力学方程正确性
 ddq = rbt.rbt_df.dd_coordinates;
 Tau = M*ddq(:) + C*dq(:) + g;
 err = Tau - tau;
