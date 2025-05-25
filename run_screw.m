@@ -27,23 +27,23 @@ make_Y_function(rbt);
 %% MCG matrix : M(q, P)  C(q, dq, P)  G(q, P) 
 make_MCG_function(rbt); 
 
-%% trajactory optimization
-qmax = deg2rad([90, 90, 90, 90, 90, 90, 180]);
-qmin = deg2rad([-90, -90, -90, -90, -90, -90, -180]);
-dqmax = [10, 10, 10, 10, 10, 10, 10];
-ddqmax = dqmax * 3;
-
-L = 7;              % 傅里叶级数
-Tf = 30;            % 周期
-N_pop = 100;        % 种群数
-N_iter = 20;       % 迭代次数
-
-[traj, result] = trajactory_optimization(rbt, qmax, qmin, dqmax, ddqmax, L, Tf, N_pop, N_iter);
-
-%% draw traj 
-draw_trajactory(traj, result.param)
-figure
-semilogy(result.cost);
-grid on;
-xlabel('iter');
-ylabel('log(cost)');
+% %% trajactory optimization
+% qmax = deg2rad([90, 90, 90, 90, 90, 90, 180]);
+% qmin = deg2rad([-90, -90, -90, -90, -90, -90, -180]);
+% dqmax = [10, 10, 10, 10, 10, 10, 10];
+% ddqmax = dqmax * 3;
+% 
+% L = 7;              % 傅里叶级数
+% Tf = 30;            % 周期
+% N_pop = 100;        % 种群数
+% N_iter = 20;       % 迭代次数
+% 
+% [traj, result] = trajactory_optimization(rbt, qmax, qmin, dqmax, ddqmax, L, Tf, N_pop, N_iter);
+% 
+% %% draw traj 
+% draw_trajactory(traj, result.param)
+% figure
+% semilogy(result.cost);
+% grid on;
+% xlabel('iter');
+% ylabel('log(cost)');

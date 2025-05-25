@@ -8,7 +8,7 @@ function base = DynamicBaseParamCalc(rbt_df, dyn)
     s = n-r;
     KG = [eye(r), Kd; zeros(s, r), eye(s)];
     eye_param_num = eye(n);
-    inertia2beta = KG * eye_param_num(:, P)';
+    inertia2beta = KG * eye_param_num(:, P)'; % 原始惯性参数到beta集合的映射  详细原来查看N22-003 section 5
 
     prime_param = rbt_df.bary_params';
     beta_param = inertia2beta * prime_param;
@@ -36,11 +36,13 @@ end
 function [r, P_X, P, Kd] = find_dyn_param_deps(rbt_df, dyn)
     dof = rbt_df.dof;
     param_num = length(rbt_df.bary_params);
+    % 采样数量等于参数数量的两倍，确保能够拿到极大线性无关组
     sample_num = param_num*2;
     Z = zeros(dof * sample_num, param_num);
     
     funcHandle = matlabFunction(vpa(dyn.H),'Vars', {rbt_df.coordinates', rbt_df.d_coordinates', rbt_df.dd_coordinates'});
-    rng(123);   % 固定随机数种子，确保每次生成结果相同
+    % 固定随机数种子，确保每次生成结果相同
+    rng(123);   
     for i = 1:sample_num
         q = rand([dof, 1])*2*pi - pi;
         dq = rand([dof, 1])*2*pi - pi;
@@ -48,7 +50,7 @@ function [r, P_X, P, Kd] = find_dyn_param_deps(rbt_df, dyn)
     %     Z(((i-1)*dof+1):(i*dof), :) = subs(regressor, [rbt_df.coordinates, rbt_df.d_coordinates, rbt_df.dd_coordinates], [q,dq,ddq]);
         Z(((i-1)*dof+1):(i*dof), :) = funcHandle(q,dq,ddq);
     end
-    %% For details, check the note N22-003 section 3
+    %% 使用QR分解计算最小惯性参数集, 详细原理查看 N22-003 section 5
     r = rank(Z);
     [~, ~, P] = qr(Z, 'vector');
     
@@ -58,7 +60,10 @@ function [r, P_X, P, Kd] = find_dyn_param_deps(rbt_df, dyn)
     eye_param_num = eye(param_num);
     
     P_X = [eye(r), R1\R2]*eye_param_num(:, P)'; %P_x mapping the parameter to the base set
-    
     Kd = R1\R2;
+    
+    % 微小项强制给0
+    P_X(abs(P_X) < 1e-10) = 0;
+    Kd(abs(Kd) < 1e-10) = 0;
 
 end

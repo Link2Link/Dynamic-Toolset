@@ -70,10 +70,13 @@ function matrix = translation_transfmat(v)
         0, 0, 0, 1];
 end
 
+% m是质量，l是质量矩，使用l/m表示r
 function r = ml2r(m, l)
     r = l / m;
 end
 
+% L是关节坐标系的惯性张量，m是质量，r是质心向量
+% 使用关节坐标下的参数表示质心坐标下的惯性张量
 function I = Lmr2I(L, m, r)
     I = L - m * vec2so3(r)' * vec2so3(r);
 end

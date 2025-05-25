@@ -1,7 +1,7 @@
 function dyn = Dynamics(rbt_df, geom, gravity_vec)
     dyn = struct();
     gravity_vec = gravity_vec(:)';
-    dyn.gravity_vec    = gravity_vec;
+    dyn.gravity_vec = gravity_vec;
     tic;
     if geom.static_model
         disp('static_model = true, overlook the dynamic effect.');
@@ -17,13 +17,16 @@ function dyn = Dynamics(rbt_df, geom, gravity_vec)
         k_e_n = 0;
         if rbt_df.use_inertia{num+1}
             disp("Calculating the link kinetic energy of " + num + "/" + rbt_df.link_nums{end});
+            % 计算重力势能
             p_e = p_e - rbt_df.m{num+1} * gravity_vec * geom.p_c{num+1};
 
 
             if ~geom.static_model
+                % 计算动能=平动动能+转动动能
                 k_e_n = rbt_df.m{num+1} * geom.v_cw{num+1}' * (geom.v_cw{num+1}) / 2 + ...
                 geom.w_b{num+1}' * rbt_df.I_by_Llm{num+1} * geom.w_b{num+1} / 2;
-
+                
+                % 化简加速计算
                 k_e_n = prod(factor(expand(k_e_n) - subs(expand(k_e_n * rbt_df.m{num+1}), rbt_df.m{num+1}, 0)/rbt_df.m{num+1}), "All");
             end
 
@@ -85,7 +88,7 @@ function dyn = Dynamics(rbt_df, geom, gravity_vec)
 %     dyn.tau = simplify(dyn.tau);
     
     disp('calc_dyn_: time ' + string(toc) + 'sec');
-    dyn.H = collect(expand(simplify(Dynamics_calc_regressor(rbt_df, dyn))));
+    dyn.H =  collect(expand(simplify(Dynamics_calc_regressor(rbt_df, dyn))));
     dyn.inertial_param = rbt_df.bary_params';
 end
 
