@@ -39,8 +39,11 @@ function [r, P_X, P, Kd] = find_dyn_param_deps(rbt_df, dyn)
     % 采样数量等于参数数量的两倍，确保能够拿到极大线性无关组
     sample_num = param_num*2;
     Z = zeros(dof * sample_num, param_num);
-    
-    funcHandle = matlabFunction(vpa(dyn.H),'Vars', {rbt_df.coordinates', rbt_df.d_coordinates', rbt_df.dd_coordinates'});
+    H = vpa(dyn.H);
+    if isa(dyn.gravity_vec, 'sym')
+        H = subs(H, dyn.gravity_vec, rand(1,3)); % 将重力向量换为数值再进行惯性参数分解
+    end
+    funcHandle = matlabFunction(H,'Vars', {rbt_df.coordinates', rbt_df.d_coordinates', rbt_df.dd_coordinates'});
     % 固定随机数种子，确保每次生成结果相同
     rng(123);   
     for i = 1:sample_num

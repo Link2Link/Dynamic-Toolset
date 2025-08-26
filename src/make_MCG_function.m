@@ -32,7 +32,7 @@ result.c = c;
 vars = symvar(g);
 static_part_vars = [];
 for v = vars
-    if ~ismember(v, rbt.rbt_df.coordinates)
+    if ~ismember(v, rbt.rbt_df.coordinates) && ~ismember(v, rbt.dyn.gravity_vec)
         static_part_vars = [static_part_vars; v];
     end
 end
@@ -44,7 +44,12 @@ result.base_param2static_param = base2static_part;
 [Gmat, ~] = equationsToMatrix(g, static_part_vars);
 result.Gmat = simplify(Gmat);
 
-matlabFunction(result.Gmat, 'File',out_path+model_name+'_G_mat', 'Vars', {rbt.rbt_df.coordinates'});
+if isa(rbt.dyn.gravity_vec, 'sym')
+   matlabFunction(result.Gmat, 'File',out_path+model_name+'_G_mat', 'Vars', {rbt.rbt_df.coordinates',rbt.dyn.gravity_vec'});
+else
+    matlabFunction(result.Gmat, 'File',out_path+model_name+'_G_mat', 'Vars', {rbt.rbt_df.coordinates'});
+end
+
 disp('function writen into '+ out_path + model_name + '_G_mat.m')
 
 matlabFunction(base2static_part, 'File',out_path+model_name+'_base_param2static_param');
@@ -53,7 +58,11 @@ disp('base param to static param mapping matrix writen into '+ out_path + model_
 %% make G matrix
 % 静态部分的运行时使用，输如角度和参数P，输出力矩
 G = vpa(simplify(g));
-matlabFunction(G, 'File',out_path+model_name+'_G_func', 'Vars', {rbt.rbt_df.coordinates', P});
+if isa(rbt.dyn.gravity_vec, 'sym')
+    matlabFunction(G, 'File',out_path+model_name+'_G_func', 'Vars', {rbt.rbt_df.coordinates', P, rbt.dyn.gravity_vec'});
+else
+    matlabFunction(G, 'File',out_path+model_name+'_G_func', 'Vars', {rbt.rbt_df.coordinates', P});
+end
 disp('function writen into '+ out_path + model_name + '_G_func.m')
 
 
@@ -66,8 +75,10 @@ for k = 1:DOF
     M_col = subs(m, [rbt.rbt_df.dd_coordinates], [one_hot']);
     M = [M, M_col];
 end
+M = simplify(M);
 result.M = M;
 matlabFunction(vpa(M), 'File',out_path+model_name+'_M_func', 'Vars', {rbt.rbt_df.coordinates', P});
+
 disp('function writen into '+ out_path + model_name + '_M_func.m')
 
 
@@ -93,6 +104,10 @@ disp('function writen into '+ out_path + model_name + '_C_func.m')
 ddq = rbt.rbt_df.dd_coordinates;
 Tau = M*ddq(:) + C*dq(:) + g;
 err = Tau - tau;
+if isa(rbt.dyn.gravity_vec, 'sym')
+    err = subs(err, rbt.dyn.gravity_vec, [0, 0, -9.8015]);
+end
+
 rand_err = subs(err, [q, dq, ddq, P'], [rand(size(q)), rand(size(dq)), rand(size(ddq)), rand(size(P'))]);
 abs_err = vpa(norm(rand_err));
 disp("Symbol deduce error is : "+string(abs_err))
